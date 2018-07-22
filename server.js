@@ -5,22 +5,18 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt-nodejs');
 const cors = require('cors');
 const knex = require('knex');
-const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
-const register = require('./controllers/register');
+// const register = require('./controllers/register');
 // const signin = require('./controllers/signin');
 const profile = require('./controllers/profile');
 const image = require('./controllers/image');
-// const auth = require('./controllers/authenticate');
 
 let authToken;
 // Generating random security key
-crypto.randomBytes(48, (err, buffer) => {
-    authToken = buffer.toString('hex');
-    // TODO think about it
-    // Use the session middleware
-    // app.use(session({ secret: authToken, cookie: { maxAge: 60000 }}));
+bcrypt.genSalt(48, (error, result) => {
+    authToken = result;
+    console.log('authToken:', authToken);
 });
 
 const db = knex({
@@ -59,7 +55,6 @@ app.get('/', (req, res) => {
     res.send(database.users);
 });
 
-// app.post('/signin', signin.handleSignin(db, authToken));
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -75,11 +70,8 @@ app.post('/login', (req, res) => {
                     .then(user => {
                         currentUser = user[0];
                         // TODO add expiration time for the token
-                        console.log('authToken:', authToken);
-                        console.log('currentUser:', currentUser);
                         const sessionId = jwt.sign(currentUser.email, authToken);
-                        console.log('sessionId:', sessionId);
-                        // res.json(user[0]);
+
                         res.send({
                             user: currentUser,
                             sessionId
@@ -87,22 +79,10 @@ app.post('/login', (req, res) => {
                     })
                     .catch(() => res.status(400).json('unable to get user'));
             } else {
-                // res.status(400).json('wrong credentials');
                 res.status(401).send();
             }
         })
         .catch(() => res.status(401).send());
-    // if (currentUser) {
-    //     // TODO add expiration time for the token
-    //     const sessionId = jwt.sign(currentUser, authToken);
-    //
-    //     res.send({
-    //         user: currentUser,
-    //         sessionId
-    //     });
-    // } else {
-    //     res.status(401).send();
-    // }
 });
 
 app.get('/is-authorized', authenticate, (req, res) => {
@@ -111,8 +91,8 @@ app.get('/is-authorized', authenticate, (req, res) => {
 
 app.get('/logout', authenticate, (req, res) => {
     // After that previous check will be invalid before the user log in again
-    crypto.randomBytes(48, (err, buffer) => {
-        authToken = buffer.toString('hex');
+    bcrypt.genSalt(48, (error, result) => {
+        authToken = result;
         currentUser = null;
 
         res.send();
@@ -120,7 +100,41 @@ app.get('/logout', authenticate, (req, res) => {
 });
 
 app.post('/register', authenticate, (req, res) => {
-    register.handleRegister(req, res, db, bcrypt);
+    const { email, name, password } = req.body;
+    if (!email || !name || !password) {
+        return res.status(400).json('incorrect form submission');
+    }
+    const hash = bcrypt.hashSync(password);
+    db.transaction(trx => {
+        trx.insert({
+            hash: hash,
+            email: email
+        })
+            .into('login')
+            .returning('email')
+            .then(loginEmail => {
+                return trx('users')
+                    .returning('*')
+                    .insert({
+                        email: loginEmail[0],
+                        name: name,
+                        joined: new Date()
+                    })
+                    .then(user => {
+                        currentUser = user[0];
+                        // TODO add expiration time for the token
+                        const sessionId = jwt.sign(currentUser.email, authToken);
+                        // res.json(user[0]);
+                        res.send({
+                            user: currentUser,
+                            sessionId
+                        });
+                    });
+            })
+            .then(trx.commit)
+            .catch(trx.rollback);
+    })
+        .catch(() => res.status(401).json('unable to register'));
 });
 
 app.get('/profile/:id', authenticate, (req, res) => {
