@@ -14,8 +14,8 @@
     "body-parser": "^1.18.2",
     "clarifai": "^2.5.0",
     "cors": "^2.8.4",
-    "crypto": "^1.0.1",
     "express": "^4.16.2",
+    "helmet": "^3.12.2",
     "jsonwebtoken": "^8.3.0",
     "knex": "^0.15.2",
     "pg": "^7.4.0"

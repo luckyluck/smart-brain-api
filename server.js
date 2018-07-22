@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt-nodejs');
 const cors = require('cors');
 const knex = require('knex');
 const jwt = require('jsonwebtoken');
+const helmet = require('helmet');
 
 // const register = require('./controllers/register');
 // const signin = require('./controllers/signin');
@@ -50,6 +51,7 @@ const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(helmet());
 
 app.get('/', (req, res) => {
     res.send(database.users);
