@@ -14,8 +14,8 @@ services:
 #      POSTGRES_PASSWORD: secret
 #      POSTGRES_DB: smart-brain-docker
 #      POSTGRES_HOST: postgres
-    links:
-      - postgres
+#    links:
+#      - postgres
     ports:
       - "3000:3000"
 #    network_mode: none
