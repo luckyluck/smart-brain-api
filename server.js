@@ -7,6 +7,7 @@ const cors = require('cors');
 const knex = require('knex');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
+const morgan = require('morgan');
 
 // const register = require('./controllers/register');
 // const signin = require('./controllers/signin');
@@ -49,6 +50,7 @@ const authenticate = function (req, res, next, authToken) {
 
 const app = express();
 
+app.use(morgan('combined'));
 app.use(cors());
 app.use(bodyParser.json());
 app.use(helmet());
