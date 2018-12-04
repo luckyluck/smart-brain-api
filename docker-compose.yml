@@ -1,12 +1,21 @@
 version: "3.6"
 
 services:
+  # Backend API
   smart-brain-api:
     container_name: backend
 #    image: node:10.13.0
     build: ./
     command: npm start
     working_dir: /usr/src/smart-brain-api
+    environment:
+      POSTGRES_URI: postgres://sally:secret@localhost:5433/smart-brain-docker
+#      POSTGRES_USER: sally
+#      POSTGRES_PASSWORD: secret
+#      POSTGRES_DB: smart-brain-docker
+#      POSTGRES_HOST: postgres
+    links:
+      - postgres
     ports:
       - "3000:3000"
 #    network_mode: none
@@ -14,3 +23,18 @@ services:
 #      - default
     volumes:
       - ./:/usr/src/smart-brain-api
+  # Postgres
+  postgres:
+    container_name: poetgres
+    image: postgres
+    environment:
+      POSTGRES_URI: postgres://sally:secret@localhost:5433/smart-brain-docker
+#      POSTGRES_USER: sally
+#      POSTGRES_PASSWORD: secret
+#      POSTGRES_DB: smart-brain-docker
+#      POSTGRES_HOST: postgres
+    expose:
+      - "5433"
+    ports:
+      - "5433"
+      - "5433:5432"

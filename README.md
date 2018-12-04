@@ -11,6 +11,7 @@ Final project for Udemy course
 7. Run `docker-compose down` to stop all running containers
 7. Run `docker-compose up -d` to launch container in the background
 8. Run `docker-compose exec smart-brain-api bash` to get access to the bash of the container running in the background
+9. Run `psql postgres://sally:secret@localhost:5433/smart-brain-docker` in your terminal to get DB connection
 
 You can grab Clarifai API key [here](https://www.clarifai.com/)
 
