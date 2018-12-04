@@ -54,7 +54,8 @@ app.use(bodyParser.json());
 app.use(helmet());
 
 app.get('/', (req, res) => {
-    res.send(database.users);
+    // res.send(db.users);
+    res.send('Its working');
 });
 
 app.post('/login', (req, res) => {
@@ -151,6 +152,6 @@ app.post('/imageurl', authenticate, (req, res) => {
     image.handleApiCall(req, res);
 });
 
-app.listen(3001, () => {
-    console.log('app is running on port 3001');
+app.listen(3000, () => {
+    console.log('app is running on port 3000');
 });
